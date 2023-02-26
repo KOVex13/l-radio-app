@@ -1,7 +1,9 @@
 const images = {
-	logo: require('./images/optimized/logo.png'),
-	play: require('./images/optimized/button-play.png'),
-	pause: require('./images/optimized/button-pause.png'),
+	icon: require('../res/images/icon.png'),
+	favicon: require('../res/images/favicon.png'),
+	logo: require('../res/images/logo.png'),
+	play: require('../res/images/button-play.png'),
+	pause: require('../res/images/button-pause.png'),
 }
 export {
 	images
