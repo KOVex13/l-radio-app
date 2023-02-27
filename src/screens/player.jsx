@@ -102,7 +102,7 @@ class Player extends React.Component {
 		  	android: {
 			    channelId,
 			    largeIcon: require('../res/images/favicon.png'),
-			    // smallIcon: 'name-of-a-small-icon', // optional, defaults to 'ic_launcher'.
+			    smallIcon: 'ic_launcher_foreground', // optional, defaults to 'ic_launcher'.
 			    // pressAction: {
 			    //  	id: playingRecording ? 'pause' : 'play',
 			    // },
@@ -132,9 +132,9 @@ class Player extends React.Component {
 						playingArtist: trackTitle[0].trim() || '«L» - радио', 
 						playingTrack: trackTitle[1].trim() || ''
 					});
-					console.log('AppState: ' + AppState.currentState);
+					//console.log('AppState: ' + AppState.currentState);
 					if (AppState.currentState.match(/inactive|background/)) {
-						if (notificationId) this.DisplayNotification();
+						this.DisplayNotification();
 					} else {
 						this.onCancelNotification();
 					}
@@ -214,7 +214,7 @@ class Player extends React.Component {
 	        if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
 				this.onCancelNotification();
 	          	console.log('App has come to the foreground!');
-	        } else if (this.state.appState === 'active' && nextAppState === 'background') {
+	        } else if (this.state.appState === 'active' && nextAppState.match(/inactive|background/)) {
 				this.onDisplayNotification();
 	          	console.log('App has go to the background!');
 	        }
