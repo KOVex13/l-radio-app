@@ -45,7 +45,7 @@ class Player extends React.Component {
 		// Create a channel (required for Android)
 		const channelId = await notifee.createChannel({
 		  	id: 'default',
-		  	name: 'Default Channel',
+		  	name: 'L Radio',
 		});
 
 		this.setState({ channelId: channelId });
@@ -136,7 +136,7 @@ class Player extends React.Component {
 					if (AppState.currentState.match(/inactive|background/)) {
 						if (notificationId) this.DisplayNotification();
 					} else {
-						if (notificationId) this.onCancelNotification();
+						this.onCancelNotification();
 					}
 	            }
 			});
@@ -150,7 +150,7 @@ class Player extends React.Component {
 		// console.log('handlePlayAudio');
 		if (isBusy) return;
 		this.setState({ isBusy: true });
-		this.DisplayNotification();
+		if (notificationId) this.DisplayNotification();
 		// If playing - stop
 		if (soundObject) {
 			soundObject
@@ -212,8 +212,7 @@ class Player extends React.Component {
 	    this.appStateSubscription = AppState.addEventListener('change', nextAppState => {
 			const { notificationId } = this.state;
 	        if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
-	        	console.log(notificationId);
-				if (notificationId) this.onCancelNotification();
+				this.onCancelNotification();
 	          	console.log('App has come to the foreground!');
 	        } else if (this.state.appState === 'active' && nextAppState === 'background') {
 				this.onDisplayNotification();
@@ -235,6 +234,7 @@ class Player extends React.Component {
 	componentWillUnmount() {
 		BackgroundTimer.stopBackgroundTimer();
 		this.appStateSubscription.remove();
+		this.onCancelNotification();
 		/*
 		const { intervalId } = this.state;
 		if (intervalId) {
