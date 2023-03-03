@@ -4,7 +4,7 @@ import { AppState, StyleSheet } from 'react-native';
 //import * as TaskManager from 'expo-task-manager';
 //import Icon from 'react-native-vector-icons/Ionicons';
 //import { Ionicons } from '@expo/vector-icons';
-import notifee, { EventType } from '@notifee/react-native';
+import notifee, { EventType, AndroidImportance } from '@notifee/react-native';
 import BackgroundTimer from 'react-native-background-timer';
 //import * as eva from '@eva-design/eva';
 //import { Layout, Text, Avatar, Input, Button } from '@ui-kitten/components';
@@ -44,8 +44,11 @@ class Player extends React.Component {
 		await notifee.requestPermission();
 		// Create a channel (required for Android)
 		const channelId = await notifee.createChannel({
-		  	id: 'default',
+		  	id: 'lradio-app',
 		  	name: 'L Radio',
+		  	badge: false,
+		  	vibration: false,
+		  	importance: AndroidImportance.LOW,
 		});
 
 		this.setState({ channelId: channelId });
@@ -101,15 +104,17 @@ class Player extends React.Component {
 		  	body: playingTrack,
 		  	android: {
 			    channelId,
+			    badge: false,
 			    largeIcon: require('../res/images/favicon.png'),
-			    smallIcon: 'ic_launcher_foreground', // optional, defaults to 'ic_launcher'.
+			    smallIcon: 'ic_launcher_round', // optional, defaults to 'ic_launcher'.
 			    // pressAction: {
 			    //  	id: playingRecording ? 'pause' : 'play',
 			    // },
 			    autoCancel: false,
-			    vibrationPattern: [],
 			    onlyAlertOnce: true,
 			    actions: actions,
+			    importance: AndroidImportance.LOW,
+			    ongoing: true
 		  	},
 		});
 		this.setState({ notificationId: notificationId });
@@ -120,13 +125,17 @@ class Player extends React.Component {
     	try {
 			const response = await fetch('https://air.unmixed.ru/status-json.xsl');
 			const json = await response.json();
-			json.icestats.source.forEach((track) => {
+			json?.icestats?.source?.forEach((track) => {
 	            if (track.listenurl.match(/\/lradiomaster1$/)) {
+	            	let changed = false;
 	                const trackTitleEncoded = decodeURIComponent(escape(track.title));
 	                const trackTitle = trackTitleEncoded.replace("'", "\'").split('-');
 	                if (trackTitle[0].trim() === '«L»') {
 	                	trackTitle[0] = '«L» - радио';
 	                	trackTitle[1] = '';
+	                }
+	                if (playingArtist !== (trackTitle[0].trim() || '«L» - радио') && (playingTrack !== trackTitle[1].trim())) {
+	                	changed = true;
 	                }
 					this.setState({ 
 						playingArtist: trackTitle[0].trim() || '«L» - радио', 
@@ -134,7 +143,8 @@ class Player extends React.Component {
 					});
 					//console.log('AppState: ' + AppState.currentState);
 					if (AppState.currentState.match(/inactive|background/)) {
-						this.DisplayNotification();
+						//console.log(changed);
+						if (changed) this.DisplayNotification();
 					} else {
 						this.onCancelNotification();
 					}
@@ -160,6 +170,7 @@ class Player extends React.Component {
 				})
 				.then(() => {
 					this.setState({ isBusy: false });
+					if (notificationId) this.DisplayNotification();
 				})
 				.catch((error) => console.log(error));
 		}
@@ -174,10 +185,11 @@ class Player extends React.Component {
 			    interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
 			    playThroughEarpieceAndroid: false
 			}).then(() => {
-				const newSoundObject = new Audio.Sound()
+				const newSoundObject = new Audio.Sound();
 				newSoundObject
 					.loadAsync({ uri: audio })
 					.then((response) => {
+						/*
 						newSoundObject.setOnPlaybackStatusUpdate((statusData) => {
 							//console.log('statusData: ' + statusData);
 							const { didJustFinish } = statusData
@@ -185,7 +197,8 @@ class Player extends React.Component {
 								this.setState({ playingRecording: false, soundObject: undefined, isBusy: false })
 							}
 						})
-						return newSoundObject.playAsync()
+						*/
+						return newSoundObject.playAsync();
 					})
 					.then(() => {
 						this.setState({ playingRecording: true, soundObject: newSoundObject, isBusy: false })
@@ -205,6 +218,7 @@ class Player extends React.Component {
 	}
 
 	componentDidMount() {
+		notifee.deleteChannel('lradio-app');
 		BackgroundTimer.runBackgroundTimer(() => { 
 			//code that will be called every 3 seconds 
 			this.getCurrentTrack();

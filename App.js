@@ -18,6 +18,7 @@ export default () => {
 	return (
 		<NativeBaseProvider config={config}>
 			<LRadioApp />
+			<StatusBar animated hidden />
 		</NativeBaseProvider>
 	);
 };
