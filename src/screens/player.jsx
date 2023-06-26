@@ -1,127 +1,74 @@
 import React from 'react';
 import { AppState, StyleSheet } from 'react-native';
-//import * as BackgroundFetch from 'expo-background-fetch';
-//import * as TaskManager from 'expo-task-manager';
-//import Icon from 'react-native-vector-icons/Ionicons';
-//import { Ionicons } from '@expo/vector-icons';
-import notifee, { EventType, AndroidImportance } from '@notifee/react-native';
 import BackgroundTimer from 'react-native-background-timer';
-//import * as eva from '@eva-design/eva';
-//import { Layout, Text, Avatar, Input, Button } from '@ui-kitten/components';
 import { Text, Box, Button, Container, Image } from 'native-base';
-//import { LinearGradient } from 'expo-linear-gradient';
-import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from 'expo-av';
 import { images } from '../res/images';
-//import { app } from '../library/networking';
+import TrackPlayer, {
+	AppKilledPlaybackBehavior,
+	Capability,
+	useTrackPlayerEvents,
+	usePlaybackState,
+	TrackPlayerEvents,
+	STATE_PLAYING,
+	Event,
+} from 'react-native-track-player';
 
 class Player extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			BACKGROUND_FETCH_TASK: 'lradio-app-background-fetch',
 			appState: AppState.currentState,
-			channelId: null,
-			notificationId: null,
 			audio: 'https://air.unmixed.ru/lradio256chelyabinsk',
-			playingRecording: false,
-			isBusy: false,
-			intervalId: null,
+			isPlaying: false,
 			playingArtist: '',
 			playingTrack: '',
-			soundObject: undefined 
 		}
 
 		this.handlePlayAudio = this.handlePlayAudio.bind(this);
 		this.getCurrentTrack = this.getCurrentTrack.bind(this);
-		this.onDisplayNotification = this.onDisplayNotification.bind(this);
-		this.onCancelNotification = this.onCancelNotification.bind(this);
-		this.DisplayNotification = this.DisplayNotification.bind(this);
+		this.setupTrackPlayer = this.setupTrackPlayer.bind(this);
 	}
 
-	async onDisplayNotification() {
-		const { playingRecording, isBusy, playingArtist, playingTrack } = this.state;
-		// Request permissions (required for iOS)
-		await notifee.requestPermission();
-		// Create a channel (required for Android)
-		const channelId = await notifee.createChannel({
-		  	id: 'lradio-app',
-		  	name: 'L Radio',
-		  	badge: false,
-		  	vibration: false,
-		  	importance: AndroidImportance.LOW,
-		});
+	async setupTrackPlayer() {
+		const { audio, playingArtist, playingTrack } = this.state;
 
-		this.setState({ channelId: channelId });
-		this.DisplayNotification();
+		const songs = [{
+			id: 1,
+			url: audio,
+			artist: playingArtist,
+			title: playingTrack,
+			artwork: require('../res/images/notification-logo.png'),
+		}];
 
-    	notifee.onBackgroundEvent(async ({ type, detail }) => {
-    		if (type === EventType.ACTION_PRESS) {
-    			console.log(detail.pressAction.id);
-	      		if (detail.pressAction.id === 'play') {
-	        		this.handlePlayAudio();
-	      		} else if (detail.pressAction.id === 'pause') {
-	        		this.handlePlayAudio();
-	      		}
-    		}
-    	});
-	}
+	    TrackPlayer.setupPlayer().then(async () => {
+	      	console.log('Player ready');
+		    await TrackPlayer.addEventListener(Event.PlaybackState, (e) => {
+		    	console.log('Player state:', e.state === 'playing');
+		    	let isPlaying = e.state === 'playing';
+		    	this.setState({ isPlaying: isPlaying });
+		    });
+	      	await TrackPlayer.reset();
+	      	await TrackPlayer.add(songs);
+	      	//TrackPlayer.play();
+	      	//this.setState({ isPlaying: true });
 
-	async onCancelNotification() {
-		const { notificationId } = this.state;
-		if (notificationId) {
-			await notifee.cancelNotification(notificationId);
-			this.setState({ notificationId: null });
-		}
-	}
-
-	async DisplayNotification() {
-		const { playingRecording, isBusy, playingArtist, playingTrack, channelId } = this.state;
-		const actions = [];
-		if (isBusy) {
-			actions.push({
-		        title: 'Processing',
-		        //icon: 'https://lradio.ru/i/icons/button-stop.png',
-		        pressAction: { id: 'processing' },
-			});
-		} else {
-			if (playingRecording) {
-				actions.push({
-			        title: 'Pause',
-			        //icon: 'https://lradio.ru/i/icons/button-stop.png',
-			        pressAction: { id: 'pause' },
-				});
-			} else {
-				actions.push({
-			        title: 'Play',
-			        //icon: 'https://lradio.ru/i/icons/button-play.png',
-			        pressAction: { id: 'play' },
-				});
-			}
-		}
-		const notificationId = await notifee.displayNotification({
-			id: 'lradio-app',
-		  	title: playingArtist,
-		  	body: playingTrack,
-		  	android: {
-			    channelId,
-			    badge: false,
-			    largeIcon: require('../res/images/favicon.png'),
-			    smallIcon: 'ic_launcher_round', // optional, defaults to 'ic_launcher'.
-			    // pressAction: {
-			    //  	id: playingRecording ? 'pause' : 'play',
-			    // },
-			    autoCancel: false,
-			    onlyAlertOnce: true,
-			    actions: actions,
-			    importance: AndroidImportance.LOW,
-			    ongoing: true
-		  	},
-		});
-		this.setState({ notificationId: notificationId });
+	      	await TrackPlayer.updateOptions({
+	        	stopWithApp: false,
+	        	alwaysPauseOnInterruption: true,
+	        	capabilities: [
+	          		Capability.Play,
+	          		Capability.Pause,
+	        	],
+			    android: {
+			        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback
+			    },
+			    icon: 'ic_launcher_round',
+	      	});
+	    });
 	}
 
     async getCurrentTrack() {
-    	const { playingArtist, playingTrack, notificationId } = this.state;
+    	const { playingArtist, playingTrack } = this.state;
     	try {
 			const response = await fetch('https://air.unmixed.ru/status-json.xsl');
 			const json = await response.json();
@@ -134,6 +81,7 @@ class Player extends React.Component {
 	                	trackTitle[0] = '«L» - радио';
 	                	trackTitle[1] = '';
 	                }
+	                changed = true;
 	                if (playingArtist !== (trackTitle[0].trim() || '«L» - радио') && (playingTrack !== trackTitle[1].trim())) {
 	                	changed = true;
 	                }
@@ -141,13 +89,21 @@ class Player extends React.Component {
 						playingArtist: trackTitle[0].trim() || '«L» - радио', 
 						playingTrack: trackTitle[1].trim() || ''
 					});
-					//console.log('AppState: ' + AppState.currentState);
+					TrackPlayer.updateMetadataForTrack(0, {
+						artist: playingArtist,
+						title: playingTrack,
+						artwork: require('../res/images/notification-logo.png')
+					});
+
+					console.log('AppState: ' + AppState.currentState);
+					/*
 					if (AppState.currentState.match(/inactive|background/)) {
 						//console.log(changed);
 						if (changed) this.DisplayNotification();
 					} else {
 						this.onCancelNotification();
 					}
+					*/
 	            }
 			});
 		} catch (error) {
@@ -156,110 +112,30 @@ class Player extends React.Component {
     }
 
 	handlePlayAudio = () => {
-		const { audio, soundObject, playingRecording, isBusy, notificationId } = this.state;
-		// console.log('handlePlayAudio');
-		if (isBusy) return;
-		this.setState({ isBusy: true });
-		if (notificationId) this.DisplayNotification();
-		// If playing - stop
-		if (soundObject) {
-			soundObject
-				.stopAsync()
-				.then(() => {
-					return soundObject.unloadAsync();
-				})
-				.then(() => {
-					this.setState({ isBusy: false });
-					if (notificationId) this.DisplayNotification();
-				})
-				.catch((error) => console.log(error));
-		}
-
-		if (!playingRecording) {
-			Audio.setAudioModeAsync({
-			    allowsRecordingIOS: false,
-			    staysActiveInBackground: true,
-			    interruptionModeIOS: InterruptionModeIOS.DuckOthers,
-			    playsInSilentModeIOS: true,
-			    shouldDuckAndroid: true,
-			    interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
-			    playThroughEarpieceAndroid: false
-			}).then(() => {
-				const newSoundObject = new Audio.Sound();
-				newSoundObject
-					.loadAsync({ uri: audio })
-					.then((response) => {
-						/*
-						newSoundObject.setOnPlaybackStatusUpdate((statusData) => {
-							//console.log('statusData: ' + statusData);
-							const { didJustFinish } = statusData
-							if (didJustFinish) {
-								this.setState({ playingRecording: false, soundObject: undefined, isBusy: false })
-							}
-						})
-						*/
-						return newSoundObject.playAsync();
-					})
-					.then(() => {
-						this.setState({ playingRecording: true, soundObject: newSoundObject, isBusy: false })
-						if (notificationId) this.DisplayNotification();
-					})
-					.catch((error) => {
-						console.log(error);
-					})
-			}).catch((e) => console.log(e));
+		const { isPlaying } = this.state;
+		console.log('handlePlayAudio', isPlaying);
+		if (!isPlaying) {
+			TrackPlayer.play();
+			this.setState({ isPlaying: true });
 		} else {
-			//If id is the same reset state
-			//await playingAudio.pauseAsync();
-			this.setState({ playingRecording: false, soundObject: undefined });
-			if (notificationId) this.DisplayNotification();
+			TrackPlayer.pause();
+			this.setState({ isPlaying: false });
 		}
-		// console.log('playingRecording: ' + playingRecording);
 	}
 
 	componentDidMount() {
-		notifee.deleteChannel('lradio-app');
+		this.setupTrackPlayer();
 		BackgroundTimer.runBackgroundTimer(() => { 
-			//code that will be called every 3 seconds 
 			this.getCurrentTrack();
 		}, 5000);
-	    this.appStateSubscription = AppState.addEventListener('change', nextAppState => {
-			const { notificationId } = this.state;
-	        if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
-				this.onCancelNotification();
-	          	console.log('App has come to the foreground!');
-	        } else if (this.state.appState === 'active' && nextAppState.match(/inactive|background/)) {
-				this.onDisplayNotification();
-	          	console.log('App has go to the background!');
-	        }
-	        this.setState({ appState: nextAppState });
-	    });
-		/*
-		const { intervalId } = this.state;
-		if (!intervalId) {
-	        const Id = setInterval(() => {
-	            this.getCurrentTrack();
-	        }, 5000);
-	        this.setState({ intervalId: Id });
-		}
-		*/
 	}
 
 	componentWillUnmount() {
 		BackgroundTimer.stopBackgroundTimer();
-		this.appStateSubscription.remove();
-		this.onCancelNotification();
-		/*
-		const { intervalId } = this.state;
-		if (intervalId) {
-			clearInterval(intervalId);
-	        this.setState({ intervalId: null });
-		}
-		*/
 	}
 
 	render() {
-		const { audio, playingRecording, isBusy, playingArtist, playingTrack } = this.state;
+		const { audio, isPlaying, isBusy, playingArtist, playingTrack } = this.state;
 		if (audio) {
 			return (
 				<>
@@ -287,9 +163,9 @@ class Player extends React.Component {
 								source={images.logo} 
 								width="100%" 
 								alt="" 
-								style={ playingRecording ? '' : {tintColor: 'gray'} }
+								style={ isPlaying ? '' : {tintColor: 'gray'} }
 							/>
-							{ !playingRecording ?
+							{ !isPlaying ?
 								<Image 
 									key={`pause-${images.logo}`}
 									source={images.logo} 
@@ -311,11 +187,10 @@ class Player extends React.Component {
 							onPress={() => this.handlePlayAudio()}
 						>
 							<Image 
-								key={ playingRecording ? images.pause : images.play } 
-								source={ playingRecording ? images.pause : images.play } 
+								key={ isPlaying ? images.pause : images.play } 
+								source={ isPlaying ? images.pause : images.play } 
 								size="md" 
 								alt=""
-								style={ isBusy ? {opacity: 0.7} : '' }
 							/>
 						</Button>
 						<Text 
@@ -331,7 +206,7 @@ class Player extends React.Component {
 							fontSize="sm"
 							color="amber.500"
 						>
-							{ playingRecording ? `${playingTrack}` : `Поток на паузе` }
+							{ isPlaying ? `${playingTrack}` : `Поток на паузе` }
 						</Text>
 					</Box>
 				</>

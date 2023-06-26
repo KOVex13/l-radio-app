@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import * as eva from '@eva-design/eva';
+//import * as eva from '@eva-design/eva';
 import { Layout, Text, Avatar, Input, Button } from '@ui-kitten/components';
 import { images } from '../res/images';
 import { app } from '../library/networking';

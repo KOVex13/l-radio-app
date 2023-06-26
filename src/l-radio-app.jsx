@@ -4,8 +4,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 //import SplashScreen from './screens/splash-screen.jsx';
 import Player from './screens/player.jsx';
-//import TopicsList from './screens/topics-list.jsx';
-//import Topic from './screens/topic.jsx';
 
 const Stack = createNativeStackNavigator();
 
