@@ -47,9 +47,13 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.kovex.lradioapp",
-      "infoPList": {
-        "UIBackgroundModes": ["audio", "fetch"]
-      }
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "audio",
+          "fetch"
+        ]
+      },
+      "buildNumber": "3"
     },
     "android": {
       "adaptiveIcon": {
