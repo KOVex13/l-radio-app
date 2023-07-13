@@ -7,19 +7,6 @@
     "icon": "./assets/icon.png",
     "plugins": [
       [
-        "@notifee/react-native",
-        {
-          "android": {
-            "compileSdkVersion": 33,
-            "targetSdkVersion": 33,
-            "buildToolsVersion": "33.0.0"
-          },
-          "ios": {
-            "deploymentTarget": "13.0"
-          }
-        }
-      ],
-      [
         "expo-build-properties",
         {
           "android": {
@@ -39,7 +26,8 @@
       "backgroundColor": "#000000"
     },
     "updates": {
-      "fallbackToCacheTimeout": 0
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/3a076a26-e818-4c7f-a4ca-5b02d166657b"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -53,7 +41,10 @@
           "fetch"
         ]
       },
-      "buildNumber": "3"
+      "buildNumber": "4",
+      "runtimeVersion": {
+        "policy": "sdkVersion"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -61,7 +52,8 @@
         "backgroundColor": "#000000"
       },
       "package": "com.kovex.lradioapp",
-      "versionCode": 8
+      "versionCode": 10,
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"

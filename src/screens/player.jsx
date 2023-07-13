@@ -18,7 +18,7 @@ class Player extends React.Component {
 		super(props);
 		this.state = {
 			appState: AppState.currentState,
-			audio: 'https://air.unmixed.ru/lradio256chelyabinsk',
+			audio: 'https://api.lradio.ru/air-mobile',
 			isPlaying: false,
 			playingArtist: '',
 			playingTrack: '',
@@ -31,7 +31,6 @@ class Player extends React.Component {
 
 	async setupTrackPlayer() {
 		const { audio, playingArtist, playingTrack } = this.state;
-
 		const songs = [{
 			id: 1,
 			url: audio,
@@ -54,17 +53,27 @@ class Player extends React.Component {
 
 	      	await TrackPlayer.updateOptions({
 	        	stopWithApp: false,
-	        	alwaysPauseOnInterruption: true,
+	        	autoHandleInterruptions: true,
 	        	capabilities: [
 	          		Capability.Play,
 	          		Capability.Pause,
 	        	],
 			    android: {
-			        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.ContinuePlayback
+			        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
+			        alwaysPauseOnInterruption: true,
 			    },
 			    icon: 'ic_launcher_round',
 	      	});
 	    });
+	    /*
+	    TrackPlayer.addEventListener(Event.PlaybackMetadataReceived, (event) => {
+	        console.log(event)
+			this.setState({ 
+				playingArtist: event.artist, 
+				playingTrack: event.title
+			});
+	    });
+	    */
 	}
 
     async getCurrentTrack() {
@@ -157,24 +166,34 @@ class Player extends React.Component {
 					>
 						<Box
 							width="100%"
+							maxH="60%"
+							alignItems="center"
+							position="relative"
 						>
 							<Image 
 								key={`play-${images.logo}`}
-								source={images.logo} 
-								width="100%" 
+								source={images.logo}
+								maxH="100%"
+								maxW="100%"
+								height="100%"
+								width="100%"
 								alt="" 
-								style={ isPlaying ? '' : {tintColor: 'gray'} }
+								style={ isPlaying ? {resizeMode: 'contain'} : {tintColor: 'gray', resizeMode: 'contain'} }
 							/>
 							{ !isPlaying ?
 								<Image 
 									key={`pause-${images.logo}`}
 									source={images.logo} 
-									width="100%" 
+									maxH="100%"
+									maxW="100%"
+									height="100%"
+									width="100%"
 									alt="" 
 									style={{
 										position: 'absolute',
 										top: 0,
 										opacity: 0.7,
+										resizeMode: 'contain'
 									}}
 	  							/>
 							:
@@ -184,6 +203,9 @@ class Player extends React.Component {
 						</Box>
 						<Button
 							variant="unstyled"
+							style={{
+								marginTop: -50,
+							}}
 							onPress={() => this.handlePlayAudio()}
 						>
 							<Image 
