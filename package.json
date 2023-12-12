@@ -1,6 +1,6 @@
 {
   "name": "l-radio-app",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "scripts": {
     "start": "expo start --dev-client",
     "android": "expo run:android",
@@ -30,7 +30,9 @@
     "react-native-screens": "~3.18.0",
     "react-native-svg": "13.4.0",
     "react-native-track-player": "^3.2.0-af9003b72394ebac2608965b8467623291d96b3d",
-    "react-navigation": "^4.4.4"
+    "react-navigation": "^4.4.4",
+    "@react-native-async-storage/async-storage": "~1.17.3",
+    "expo-location": "~15.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.22.8"

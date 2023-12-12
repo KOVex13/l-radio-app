@@ -12,9 +12,10 @@ module.exports = async function(): Promise<void> {
   	});
     */
     TrackPlayer.addEventListener(Event.RemotePlay, () => {
-    	TrackPlayer.play()
+        TrackPlayer.stop();
+    	TrackPlayer.play();
     });
     TrackPlayer.addEventListener(Event.RemotePause, () => {
-    	TrackPlayer.pause()
+    	TrackPlayer.pause();
     });
 }

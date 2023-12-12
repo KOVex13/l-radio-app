@@ -9,23 +9,23 @@
       "developmentClient": true,
       "distribution": "internal",
       "ios": {
-        "resourceClass": "m1-medium"
+        "resourceClass": "m-medium"
       }
     },
     "preview": {
       "autoIncrement": false,
       "distribution": "internal",
       "ios": {
-        "resourceClass": "m1-medium"
+        "resourceClass": "m-medium"
       },
       "android": {
         "buildType": "apk"
       }
     },
     "production": {
-      "autoIncrement": true,
+      "autoIncrement": false,
       "ios": {
-        "resourceClass": "m1-medium"
+        "resourceClass": "m-medium"
       }
     }
   },

@@ -2,7 +2,7 @@
   "expo": {
     "name": "«L» радио",
     "slug": "l-radio-app",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "plugins": [
@@ -17,6 +17,12 @@
           "ios": {
             "deploymentTarget": "13.0"
           }
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
         }
       ]
     ],
@@ -41,7 +47,7 @@
           "fetch"
         ]
       },
-      "buildNumber": "6",
+      "buildNumber": "15",
       "runtimeVersion": {
         "policy": "sdkVersion"
       }
@@ -52,8 +58,8 @@
         "backgroundColor": "#000000"
       },
       "package": "com.kovex.lradioapp",
-      "versionCode": 10,
-      "runtimeVersion": "1.0.2"
+      "versionCode": 16,
+      "runtimeVersion": "1.0.4"
     },
     "web": {
       "favicon": "./assets/favicon.png"
