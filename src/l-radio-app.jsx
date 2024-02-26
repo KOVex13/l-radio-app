@@ -44,6 +44,11 @@ class LRadioApp extends React.Component {
     	console.log('getLocation', status);
       	if (status !== 'granted') {
         	console.log('Permission to access location was denied');
+			await this.storeData('location', {
+				area: 'Челябинская обл.',
+				localitie: 'Челябинск',
+				value: 'Челябинск, Челябинская обл.'
+			});
 	    } else {
 	      	let location = await Location.getCurrentPositionAsync({});
 	      	let data = await Location.reverseGeocodeAsync(location.coords);

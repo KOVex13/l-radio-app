@@ -22,7 +22,9 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location for get audio stream your city or region.",
+          "locationAlwaysPermission": "Allow $(PRODUCT_NAME) to use your location for get audio stream your city or region.",
+          "locationWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location for get audio stream your city or region."
         }
       ]
     ],
@@ -47,7 +49,7 @@
           "fetch"
         ]
       },
-      "buildNumber": "15",
+      "buildNumber": "18",
       "runtimeVersion": {
         "policy": "sdkVersion"
       }
@@ -58,7 +60,7 @@
         "backgroundColor": "#000000"
       },
       "package": "com.kovex.lradioapp",
-      "versionCode": 16,
+      "versionCode": 17,
       "runtimeVersion": "1.0.4"
     },
     "web": {
