@@ -40,24 +40,31 @@ class LRadioApp extends React.Component {
 	}
 
 	async getLocation() {
+		let success = 0;
     	let { status } = await Location.requestForegroundPermissionsAsync();
     	console.log('getLocation', status);
-      	if (status !== 'granted') {
+      	if (status === 'granted') {
+	      	let location = await Location.getCurrentPositionAsync({});
+	      	if (location?.coords) {
+		      	let data = await Location.reverseGeocodeAsync(location.coords);
+		      	if (data.length) {
+					await this.storeData('location', {
+						area: data[0].region,
+						localitie: data[0].city,
+						value: `${data[0].city}, ${data[0].region}`
+					});
+					success = 1;
+			      	console.log(data);
+		      	}
+		    }
+	    }
+	    if (!success) {
         	console.log('Permission to access location was denied');
 			await this.storeData('location', {
 				area: 'Челябинская обл.',
 				localitie: 'Челябинск',
 				value: 'Челябинск, Челябинская обл.'
 			});
-	    } else {
-	      	let location = await Location.getCurrentPositionAsync({});
-	      	let data = await Location.reverseGeocodeAsync(location.coords);
-			await this.storeData('location', {
-				area: data[0].region,
-				localitie: data[0].city,
-				value: `${data[0].city}, ${data[0].region}`
-			});
-	      	console.log(data);
 	    }
 	}
 
